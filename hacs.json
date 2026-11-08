@@ -1,0 +1,5 @@
+{
+  "name": "ABB B21/B23/B24 energy meter",
+  "homeassistant": "2026.11.0",
+  "render_readme": true
+}

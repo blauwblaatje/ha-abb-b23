@@ -1,0 +1,168 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect an ABB meter",
+        "description": "How is the meter's RS-485 bus reached?",
+        "menu_options": {
+          "serial": "Serial port (USB adapter or ESPHome serial proxy)",
+          "tcp": "Modbus TCP gateway"
+        }
+      },
+      "serial": {
+        "title": "Serial port",
+        "data": {
+          "device": "Serial port",
+          "baudrate": "Baud rate",
+          "parity": "Parity",
+          "stopbits": "Stop bits",
+          "unit_id": "Modbus address"
+        },
+        "data_description": {
+          "device": "Ports shared by an ESPHome serial proxy are listed under Serial proxies.",
+          "baudrate": "Must match the meter's setting (factory default 19200).",
+          "parity": "Must match the meter's setting (factory default even).",
+          "unit_id": "The meter's Modbus address (1-247), set on the meter's display."
+        }
+      },
+      "tcp": {
+        "title": "Modbus TCP gateway",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "unit_id": "Modbus address"
+        },
+        "data_description": {
+          "unit_id": "The meter's Modbus address (1-247), set on the meter's display."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not open the connection.",
+      "no_response": "The connection opened, but no meter answered at this address. Check the address, baud rate, parity and wiring.",
+      "device_in_use": "This port is already in use with different line settings by another integration.",
+      "unknown": "Unexpected error, see the logs."
+    },
+    "abort": {
+      "already_configured": "This meter is already configured."
+    }
+  },
+  "selector": {
+    "parity": {
+      "options": {
+        "N": "None",
+        "E": "Even",
+        "O": "Odd"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "voltage_l1_n": {
+        "name": "Voltage L1-N"
+      },
+      "voltage_l2_n": {
+        "name": "Voltage L2-N"
+      },
+      "voltage_l3_n": {
+        "name": "Voltage L3-N"
+      },
+      "voltage_l1_l2": {
+        "name": "Voltage L1-L2"
+      },
+      "voltage_l3_l2": {
+        "name": "Voltage L3-L2"
+      },
+      "voltage_l1_l3": {
+        "name": "Voltage L1-L3"
+      },
+      "current_l1": {
+        "name": "Current L1"
+      },
+      "current_l2": {
+        "name": "Current L2"
+      },
+      "current_l3": {
+        "name": "Current L3"
+      },
+      "current_n": {
+        "name": "Current neutral"
+      },
+      "active_power": {
+        "name": "Active power"
+      },
+      "active_power_l1": {
+        "name": "Active power L1"
+      },
+      "active_power_l2": {
+        "name": "Active power L2"
+      },
+      "active_power_l3": {
+        "name": "Active power L3"
+      },
+      "reactive_power": {
+        "name": "Reactive power"
+      },
+      "reactive_power_l1": {
+        "name": "Reactive power L1"
+      },
+      "reactive_power_l2": {
+        "name": "Reactive power L2"
+      },
+      "reactive_power_l3": {
+        "name": "Reactive power L3"
+      },
+      "apparent_power": {
+        "name": "Apparent power"
+      },
+      "apparent_power_l1": {
+        "name": "Apparent power L1"
+      },
+      "apparent_power_l2": {
+        "name": "Apparent power L2"
+      },
+      "apparent_power_l3": {
+        "name": "Apparent power L3"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "power_factor": {
+        "name": "Power factor"
+      },
+      "power_factor_l1": {
+        "name": "Power factor L1"
+      },
+      "power_factor_l2": {
+        "name": "Power factor L2"
+      },
+      "power_factor_l3": {
+        "name": "Power factor L3"
+      },
+      "active_energy_import": {
+        "name": "Active energy import"
+      },
+      "active_energy_export": {
+        "name": "Active energy export"
+      },
+      "active_energy_net": {
+        "name": "Active energy net"
+      },
+      "reactive_energy_import": {
+        "name": "Reactive energy import"
+      },
+      "reactive_energy_export": {
+        "name": "Reactive energy export"
+      },
+      "reactive_energy_net": {
+        "name": "Reactive energy net"
+      },
+      "apparent_energy_import": {
+        "name": "Apparent energy import"
+      },
+      "apparent_energy_export": {
+        "name": "Apparent energy export"
+      }
+    }
+  }
+}
