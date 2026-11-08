@@ -1,0 +1,15 @@
+{
+  "domain": "abb_b23",
+  "name": "ABB B21/B23/B24 energy meter",
+  "codeowners": ["@blauwblaatje"],
+  "config_flow": true,
+  "connectivity": ["modbus"],
+  "dependencies": ["modbus", "usb"],
+  "documentation": "https://github.com/blauwblaatje/ha-abb-b23",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/blauwblaatje/ha-abb-b23/issues",
+  "loggers": ["modbus_connection", "tmodbus"],
+  "requirements": [],
+  "version": "0.1.0"
+}
