@@ -20,13 +20,12 @@ from homeassistant.const import (
     UnitOfReactiveEnergy,
     UnitOfReactivePower,
 )
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_UNIT_ID, DOMAIN, MANUFACTURER
-from .coordinator import AbbConfigEntry, AbbCoordinator
+from .coordinator import AbbConfigEntry
+from .entity import AbbEntity
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -173,6 +172,22 @@ SENSORS: tuple[AbbSensorDescription, ...] = (
     # HA has no apparent-energy device class; keep the unit, drop the class.
     _energy("apparent_energy_import", None, "kVAh"),  # type: ignore[arg-type]
     _energy("apparent_energy_export", None, "kVAh"),  # type: ignore[arg-type]
+    *(
+        _energy(
+            f"active_energy_import_{phase}",
+            SensorDeviceClass.ENERGY,
+            UnitOfEnergy.KILO_WATT_HOUR,
+        )
+        for phase in ("l1", "l2", "l3")
+    ),
+    AbbSensorDescription(
+        key="power_fail_count",
+        translation_key="power_fail_count",
+        # Can be reset on the meter; TOTAL_INCREASING treats a drop as a reset.
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        support_key="power_fail_count",
+    ),
 )
 
 
@@ -192,30 +207,10 @@ async def async_setup_entry(
     )
 
 
-class AbbSensor(CoordinatorEntity[AbbCoordinator], SensorEntity):
+class AbbSensor(AbbEntity, SensorEntity):
     """One measured quantity."""
 
-    _attr_has_entity_name = True
     entity_description: AbbSensorDescription
-
-    def __init__(
-        self, coordinator: AbbCoordinator, description: AbbSensorDescription
-    ) -> None:
-        """Set up the sensor."""
-        super().__init__(coordinator)
-        self.entity_description = description
-        entry = coordinator.config_entry
-        info = entry.runtime_data.info
-        device_id = str(entry.unique_id)
-        self._attr_unique_id = f"{device_id}_{description.key}"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, device_id)},
-            manufacturer=MANUFACTURER,
-            model=info.model,
-            sw_version=info.firmware,
-            serial_number=info.serial_number,
-            name=f"ABB meter {entry.data[CONF_UNIT_ID]}",
-        )
 
     @property
     def native_value(self) -> float | None:

@@ -76,3 +76,39 @@ def test_decode_ascii() -> None:
              int.from_bytes(b"11", "big"), int.from_bytes(b"2-", "big"),
              int.from_bytes(b"10", "big"), int.from_bytes(b"0\x00", "big")]
     assert reg.decode_ascii(words) == "B23 112-100"
+
+
+def test_phase_energy_block() -> None:
+    block = reg.PHASE_ENERGY
+    assert block.optional
+    words = [0] * block.count
+    _put(words, block, 0x5460, 12345, 4)  # 123.45 kWh
+    _put(words, block, 0x5464, 0xFFFF_FFFF_FFFF_FFFF, 4)  # not measured
+    _put(words, block, 0x5468, 1, 4)  # 0.01 kWh
+
+    values = reg.decode_block(block, words)
+
+    assert values == {
+        "active_energy_import_l1": pytest.approx(123.45),
+        "active_energy_import_l2": None,
+        "active_energy_import_l3": pytest.approx(0.01),
+    }
+
+
+def test_status_block_keeps_flags_exact() -> None:
+    block = reg.STATUS
+    assert block.optional
+    assert block.address + block.count == 0x8A30  # ends with the fail counter
+    words = [0] * block.count
+    _put(words, block, 0x8A13, 0x8000_0000_0000_0001, 4)  # top and bottom bit
+    _put(words, block, 0x8A25, 0, 4)
+    _put(words, block, 0x8A2F, 7, 1)
+
+    values = reg.decode_block(block, words)
+
+    # 64-bit flags must not go through a float (which would lose the low bit).
+    assert values["error_flags"] == 0x8000_0000_0000_0001
+    assert isinstance(values["error_flags"], int)
+    assert values["alarm_flags"] == 0
+    assert values["power_fail_count"] == 7
+    assert set(values) == set(reg.block_keys(block))

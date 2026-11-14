@@ -57,6 +57,11 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "problem": {
+        "name": "Meter problem"
+      }
+    },
     "sensor": {
       "voltage_l1_n": {
         "name": "Voltage L1-N"
@@ -162,6 +167,18 @@
       },
       "apparent_energy_export": {
         "name": "Apparent energy export"
+      },
+      "active_energy_import_l1": {
+        "name": "Active energy import L1"
+      },
+      "active_energy_import_l2": {
+        "name": "Active energy import L2"
+      },
+      "active_energy_import_l3": {
+        "name": "Active energy import L3"
+      },
+      "power_fail_count": {
+        "name": "Power failures"
       }
     }
   }

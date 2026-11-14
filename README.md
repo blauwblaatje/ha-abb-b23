@@ -29,6 +29,13 @@ Marketplace (HACS) → ⋮ → *Custom repositories* → add this repository as 
 
 Voltages (L-N, and L-L disabled by default), currents, active/reactive/apparent
 power (total and per phase), frequency, power factor, and the total energy
-accumulators (import / export / net, full 64-bit). Quantities the meter variant
-does not measure (it reports an "invalid" value, e.g. reactive power on a
-B23 112-100) are not created.
+accumulators (import / export / net, full 64-bit), and active import energy
+per phase. Quantities the meter variant does not measure (it reports an
+"invalid" value, e.g. reactive power on a B23 112-100) are not created.
+
+Diagnostics:
+
+- **Power failures**: the meter's power fail counter.
+- **Meter problem**: on while the meter has any error or alarm flag set. The
+  manual does not document what each bit means, so the raw error, warning,
+  alarm and information flag words are shown as attributes.

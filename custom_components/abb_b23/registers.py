@@ -61,17 +61,27 @@ class Register:
 
 @dataclass(frozen=True, kw_only=True)
 class Block:
-    """A contiguous range read with one Modbus request."""
+    """A contiguous range read with one Modbus request.
+
+    ``optional`` blocks hold quantities not every meter variant or firmware
+    has; an exception response there means "not supported", not a failure.
+    """
 
     address: int
     count: int
+    optional: bool = False
 
 
 # Instantaneous values: one read of 0x5B00..0x5B3D.
 INSTANTANEOUS = Block(address=0x5B00, count=0x3E)
 # Total energy accumulators: one read of 0x5000..0x501F.
 ENERGY = Block(address=0x5000, count=0x20)
-BLOCKS = (INSTANTANEOUS, ENERGY)
+# Active import energy per phase: 0x5460..0x546B.
+PHASE_ENERGY = Block(address=0x5460, count=0x0C, optional=True)
+# Error, information, warning and alarm flags plus the power fail counter:
+# 0x8A13..0x8A2F in one read (the gaps in between may be read too).
+STATUS = Block(address=0x8A13, count=0x8A2F - 0x8A13 + 1, optional=True)
+BLOCKS = (INSTANTANEOUS, ENERGY, PHASE_ENERGY, STATUS)
 
 # Identification, read once at setup.
 SERIAL_NUMBER = Register(key="serial", address=0x8900, reg_type=RegType.U32, scale=1)
@@ -138,6 +148,17 @@ REGISTERS: tuple[Register, ...] = (
     _r("reactive_energy_net", 0x5014, S64, 0.01),
     _r("apparent_energy_import", 0x5018, U64, 0.01),
     _r("apparent_energy_export", 0x501C, U64, 0.01),
+    # Active import energy per phase, 0.01 kWh
+    _r("active_energy_import_l1", 0x5460, U64, 0.01),
+    _r("active_energy_import_l2", 0x5464, U64, 0.01),
+    _r("active_energy_import_l3", 0x5468, U64, 0.01),
+    # Status: 64-bit flag words (scale 1 keeps them exact integers) and the
+    # number of power failures the meter has seen.
+    _r("error_flags", 0x8A13, U64, 1),
+    _r("information_flags", 0x8A19, U64, 1),
+    _r("warning_flags", 0x8A1F, U64, 1),
+    _r("alarm_flags", 0x8A25, U64, 1),
+    _r("power_fail_count", 0x8A2F, U16, 1),
 )
 
 REGISTERS_BY_KEY = {reg.key: reg for reg in REGISTERS}
@@ -157,15 +178,22 @@ def decode_raw(words: list[int], reg_type: RegType) -> int | None:
     return raw
 
 
+def _block_registers(block: Block) -> list[Register]:
+    end = block.address + block.count
+    return [reg for reg in REGISTERS if block.address <= reg.address < end]
+
+
+def block_keys(block: Block) -> list[str]:
+    """Keys of the registers that lie inside ``block``."""
+    return [reg.key for reg in _block_registers(block)]
+
+
 def decode_block(block: Block, words: list[int]) -> dict[str, float | None]:
     """Decode every register that lies inside ``block`` from its raw words."""
     if len(words) != block.count:
         raise ValueError(f"expected {block.count} registers, got {len(words)}")
     values: dict[str, float | None] = {}
-    end = block.address + block.count
-    for reg in REGISTERS:
-        if not block.address <= reg.address < end:
-            continue
+    for reg in _block_registers(block):
         offset = reg.address - block.address
         raw = decode_raw(words[offset : offset + reg.words], reg.reg_type)
         values[reg.key] = None if raw is None else raw * reg.scale

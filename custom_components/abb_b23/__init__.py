@@ -13,7 +13,7 @@ from .const import CONF_UNIT_ID
 from .coordinator import AbbConfigEntry, AbbCoordinator, AbbRuntimeData
 from .meter import AbbMeter, create_modbus_params
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: AbbConfigEntry) -> bool:

@@ -32,6 +32,7 @@ from .registers import (
     SERIAL_NUMBER,
     TYPE_DESIGNATION_ADDRESS,
     TYPE_DESIGNATION_WORDS,
+    block_keys,
     decode_ascii,
     decode_block,
     decode_raw,
@@ -105,6 +106,15 @@ class AbbMeter:
         """Read all measurements."""
         values: dict[str, float | None] = {}
         for block in BLOCKS:
-            words = await self.unit.read_holding_registers(block.address, block.count)
-            values.update(decode_block(block, words))
+            try:
+                words = await self.unit.read_holding_registers(
+                    block.address, block.count
+                )
+            except ModbusExceptionError:
+                if not block.optional:
+                    raise
+                # The meter answered but has no such registers.
+                values.update(dict.fromkeys(block_keys(block)))
+            else:
+                values.update(decode_block(block, words))
         return values
