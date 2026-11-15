@@ -96,13 +96,14 @@ def _energy(
     )
 
 
-def _power_factor(key: str) -> AbbSensorDescription:
+def _power_factor(key: str, enabled: bool = True) -> AbbSensorDescription:
     return AbbSensorDescription(
         key=key,
         translation_key=key,
         device_class=SensorDeviceClass.POWER_FACTOR,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=3,
+        entity_registry_enabled_default=enabled,
     )
 
 
@@ -142,9 +143,12 @@ SENSORS: tuple[AbbSensorDescription, ...] = (
         suggested_display_precision=2,
     ),
     _power_factor("power_factor"),
-    _power_factor("power_factor_l1"),
-    _power_factor("power_factor_l2"),
-    _power_factor("power_factor_l3"),
+    # Disabled by default: at least the B23 112-10E reports these as invalid
+    # even under load, and a validity check on the first read can't tell
+    # "not measured" from "no current on this phase right now".
+    _power_factor("power_factor_l1", enabled=False),
+    _power_factor("power_factor_l2", enabled=False),
+    _power_factor("power_factor_l3", enabled=False),
     _energy("active_energy_import", SensorDeviceClass.ENERGY, UnitOfEnergy.KILO_WATT_HOUR),
     _energy("active_energy_export", SensorDeviceClass.ENERGY, UnitOfEnergy.KILO_WATT_HOUR),
     _energy(

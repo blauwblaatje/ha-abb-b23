@@ -28,10 +28,15 @@ Marketplace (HACS) → ⋮ → *Custom repositories* → add this repository as 
 ## Sensors
 
 Voltages (L-N, and L-L disabled by default), currents, active/reactive/apparent
-power (total and per phase), frequency, power factor, and the total energy
+power (total and per phase), frequency, power factor (per phase disabled by
+default, see below), and the total energy
 accumulators (import / export / net, full 64-bit), and active import energy
 per phase. Quantities the meter variant does not measure (it reports an
 "invalid" value, e.g. reactive power on a B23 112-100) are not created.
+
+Per-phase power factor is disabled by default: the B23 112-10E reports it as
+invalid even under load (only the total power factor is available). Enable
+the sensors if your meter does report it.
 
 Diagnostics:
 
